@@ -1,0 +1,56 @@
+{% extends 'src/base.html' %}
+
+{% block title %}Добавить нового разработчика{% endblock %}
+
+
+{% block content %}
+	<div class="row">
+		<div class="col-md-12">
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-12">
+			<h3 class="text-center">
+				Введите информацию о пользователе
+			</h3>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-4">
+		</div>
+		<div class="col-md-4">
+			<form role="form" method="post">
+				<div class="form-group">
+					 
+					<label for="exampleInputEmail1">
+						Почта
+					</label>
+					<input class="form-control" id="email" name="email"/>
+				</div>
+				<div class="form-group">
+					 
+					<label for="exampleInputPassword1">
+						Пароль
+					</label>
+					<input type="password" class="form-control" id="password" name="password"/>
+				</div>
+				<div class="form-group">
+				<button type="submit" class="btn btn-primary">
+					Добавить разработчика
+				</button>
+                    </div>
+			</form>
+		</div>
+		<div class="col-md-4">
+		</div>
+	</div>
+</div>
+{% endblock %}
+
+{% block footer %}
+    	<div class="row">
+					<a type="button" class="btn btn-success btn-block" href="/">
+						Вернуться в главное меню
+					</a>
+        </div>
+{% endblock %}

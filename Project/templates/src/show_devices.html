@@ -1,0 +1,56 @@
+{% extends 'src/base.html' %}
+
+{% block title %}Главная страница{% endblock %}
+
+{% block content %}
+	<div class="row">
+		<div class="col-md-12">
+			<h3 class="text-center text-primary">
+				Список устройств разработчика {{ user[1] }}
+			</h3>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-2">
+			<div class="row">
+			</div>
+		</div>
+		<div class="col-md-8">
+			<div class="row">
+				<div class="col-md-12">
+                    {% if devices %}
+                        <h3>Количество устройств: {{ devices|length }}</h3>
+                    {% for device in devices %}
+					<h3 class="text-center">
+						{{ device[2] }}
+					</h3>
+                        <h4>
+                        Тип: {{ device[4] }}
+                        </h4>
+					<p>
+						Описание: {{ device[3] }}
+					</p>
+                    {% endfor %}
+                    {% else %}
+                    <h3 class="text-center">
+                    У пользователя нету устройств
+                    </h3>
+                    {% endif %}
+				</div>
+			</div>
+		</div>
+		<div class="col-md-2">
+			<div class="row">
+				</div>
+			</div>
+		</div>
+	</div>
+{% endblock %}
+
+{% block footer %}
+    	<div class="row">
+					<a type="button" class="btn btn-success btn-block" href="/">
+						Вернуться в главное меню
+					</a>
+        </div>
+{% endblock %}

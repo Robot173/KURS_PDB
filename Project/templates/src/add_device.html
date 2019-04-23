@@ -1,0 +1,73 @@
+{% extends 'src/base.html' %}
+    {% block title %}Добавить новое устройство{% endblock %}
+
+
+    {% block content %}
+	<div class="row">
+		<div class="col-md-12">
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-12">
+			<h3 class="text-center">
+				Введите информацию об устройстве
+			</h3>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-4">
+		</div>
+		<div class="col-md-4">
+			<form role="form" method="post">
+                <div class="form-group">
+					<label for="user_id">
+						Пользователь
+					</label>
+                    <select class="form-control" id="user_id" name="user_id" type="user">
+                        {% for user in users %}
+						<option value="{{ user['user_id'] }}">{{ user['email'] }}</option>
+                        {% endfor %}
+					</select>
+				</div>
+				<div class="form-group">
+					<label for="name">
+						Название
+					</label>
+					<input type="name" class="form-control" id="name" name="name" />
+				</div>
+				<div class="form-group">
+					<label for="description">
+						Описание
+					</label>
+					<input type="description" class="form-control" id="description" name="description" />
+				</div>
+				<div class="form-group">	 
+					<label for="device_type">
+						Тип устройства
+					</label>
+                <select class="form-control" id="device_type" name="device_type" type="device_type">
+                    {% for type in device_types %}
+						<option value="{{ type }}">{{ type|capitalize }}</option>
+                    {% endfor %}
+                </select>
+				</div>
+				<div class="form-group">
+				<button type="submit" class="btn btn-primary">
+					Добавить устройство
+				</button>
+                    </div>
+			</form>
+		</div>
+		<div class="col-md-4">
+		</div>
+	</div>
+{% endblock %}
+
+
+{% block footer %}
+    	<div class="row">
+					<a type="button" class="btn btn-success btn-block" href="/">
+						Вернуться в главное меню
+					</a>
+        </div>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends 'src/base.html' %}
+
+{% block title %}Выбрать устройство{% endblock %}
+
+{% block content %}
+    <div class="row">
+		<div class="col-md-4">
+		</div>
+		<div class="col-md-4">
+			<form role="form" method="post">
+                <div class="form-group">
+					<label for="InputUser">
+						Устройство
+					</label>
+                    <select class="form-control" id="device_id" name="device_id" type="device">
+                        {% for device in devices %}
+                            <option value="{{ device['device_id'] }}">{{ device['name'] }}</option>
+                        {% endfor %}
+					</select>
+				</div>
+				<div class="form-group">
+				<button type="submit" class="btn btn-primary">
+					Изменить устройство
+				</button>
+                </div>
+			</form>
+		</div>
+		<div class="col-md-4">
+		</div>
+	</div>
+{% endblock %}
+
+{% block footer %}
+    	<div class="row">
+					<a type="button" class="btn btn-success btn-block" href="/">
+						Вернуться в главное меню
+					</a>
+        </div>
+{% endblock %}

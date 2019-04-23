@@ -1,0 +1,39 @@
+{% extends 'src/base.html' %}
+
+{% block title %}Выберите разработчика{% endblock %}
+
+{% block content %}
+    <div class="row">
+		<div class="col-md-4">
+		</div>
+		<div class="col-md-4">
+			<form role="form" method="post">
+                <div class="form-group">
+					<label for="InputUser">
+						Разработчик
+					</label>
+                    <select class="form-control" id="InputUser" name="InputUser" type="user">
+                        {% for user in users %}
+						<option value="{{ user[0] }}">{{ user[1] }}</option>
+                        {% endfor %}
+					</select>
+				</div>
+				<div class="form-group">
+				<button type="submit" class="btn btn-primary">
+					Вывести список
+				</button>
+                </div>
+			</form>
+		</div>
+		<div class="col-md-4">
+		</div>
+	</div>
+{% endblock %}
+
+{% block footer %}
+    	<div class="row">
+					<a type="button" class="btn btn-success btn-block" href="/">
+						Вернуться в главное меню
+					</a>
+        </div>
+{% endblock %}
