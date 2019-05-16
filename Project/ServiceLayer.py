@@ -108,6 +108,8 @@ class ServiceDB:
         if res is 0:
             raise SaveException
         else:
+            if res is -1:
+                return 'No permission'
             return 'OK'
     
     @staticmethod
@@ -132,6 +134,8 @@ class ServiceDB:
             raise UpdateException
         if res is 0:
             raise UpdateException
+        elif res is -1:
+            raise PermissionException
         else:
             return 'OK'
         
@@ -153,13 +157,15 @@ class ServiceDB:
             raise DeleteException
         if res is 0:
             raise DeleteException
+        elif res is -1:
+            raise PermissionException
         else:
             return 'OK'
 
     @staticmethod
     def get_objects(model, search=None, value=None):
         if model is 'user':
-            res = UsGW.read(value)
+            res = UsGW.read(search, value)
         elif model is 'device':
             res = DevGW.read(search, value)
         elif model is 'test':

@@ -18,12 +18,16 @@ class UserGateway:
                 return 0
 
     @staticmethod
-    def read(user_id=None):
+    def read(search=None, value=None):
         with connection.cursor(cursor_factory=psycopg2.extras.DictCursor) as c:
             query = 'SELECT * FROM public.tsr_user'
-            if user_id is not None:
-                query += ' WHERE user_id=%s;'
-                c.execute(query, (user_id, ))
+            if search is not None:
+                if search is 'id':
+                    query += ' WHERE user_id=%s'
+                    c.execute(query, (value,))
+                if search is 'email':
+                    query += ' WHERE email=%s'
+                    c.execute(query, (value,))
             else:
                 query += ';'
                 c.execute(query)

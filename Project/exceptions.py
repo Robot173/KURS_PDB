@@ -12,3 +12,7 @@ class DeleteException(Exception):
 
 class GetException(Exception):
     pass
+
+
+class PermissionException(Exception):
+    pass
