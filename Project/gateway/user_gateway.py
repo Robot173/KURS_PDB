@@ -5,13 +5,13 @@ import psycopg2
 class UserGateway:
 
     @staticmethod
-    def create(email, password, last_name, first_name, city, profession, organization, dob, role="tester"):
+    def create(email, password, last_name, first_name, city, profession, organization, dob, user_role='tester'):
         with connection.cursor() as c:
             query = 'INSERT INTO public.tsr_user(' \
-                    '  email, password, last_name, first_name, city, profession, organization, dob, role)' \
+                    '  email, password, last_name, first_name, city, profession, organization, dob, user_role)' \
                     '  VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);'
             try:
-                c.execute(query, (email, password, last_name, first_name, city, profession, organization, dob, role))
+                c.execute(query, (email, password, last_name, first_name, city, profession, organization, dob, user_role))
                 connection.commit()
                 return 1
             except psycopg2.DatabaseError:

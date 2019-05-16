@@ -1,9 +1,9 @@
-from gateway.device_gateway import DeviceGateway as DevGW
-from gateway.user_gateway import UserGateway as UsGW
-from gateway.test_gateway import TestGateway as TestGW
-from gateway.report_gateway import ReportGateway as RepGW
-from gateway.report_rating_gateway import ReportRatingGateway as RatGW
-from gateway.post_gateway import PostGateway as PostGW
+from proxy.device_proxy import DeviceProxy as DevGW
+from proxy.user_proxy import UserProxy as UsGW
+from proxy.test_proxy import TestProxy as TestGW
+from proxy.report_proxy import ReportProxy as RepGW
+from proxy.rating_proxy import RatingProxy as RatGW
+from proxy.post_proxy import PostProxy as PostGW
 from constants import *
 from exceptions import *
 import datetime
@@ -61,7 +61,7 @@ class ServiceValidator:
 
 class ServiceDB:
     @staticmethod
-    def save_to_db(post, model):
+    def save_to_db(post, model, role):
         if model is 'user':
             res = UsGW.create(
                 email=post['email'],
@@ -71,19 +71,22 @@ class ServiceDB:
                 city=post['city'],
                 profession=post['profession'],
                 organization=post['organization'],
-                dob=post['dob'])
+                dob=post['dob'],
+                role=role)
         elif model is 'device':
             res = DevGW.create(
                 name=post['name'],
                 description=post['description'],
                 image=post['image'],
                 author_id=post['user_id'],
-                device_type=post['device_type'])
+                device_type=post['device_type'],
+                role=role)
         elif model is 'test':
             res = TestGW.create(
                 title=post['title'],
                 requirements=post['requirements'],
-                device_id=post['device_id'])
+                device_id=post['device_id'],
+                role=role)
         elif model is 'post':
             res = PostGW.create(
                 title=post['title'],
@@ -91,18 +94,21 @@ class ServiceDB:
                 doc=post['doc'],
                 body=post['body'],
                 creator_id=post['creator_id'],
-                post_type=post['post_type'])
+                post_type=post['post_type'],
+                role=role)
         elif model is 'report':
             res = RepGW.create(
                 tester_id=post['tester_id'],
                 body=post['body'],
-                test_id=post['test_id'])
+                test_id=post['test_id'],
+                role=role)
         elif model is 'rating':
             res = RatGW.create(
                 report_id=post['report_id'],
                 developer_id=post['developer_id'],
                 rating=post['rating'],
-                comment=post['comment'])
+                comment=post['comment'],
+                role=role)
         else:
             raise SaveException
         if res is 0:
@@ -113,23 +119,26 @@ class ServiceDB:
             return 'OK'
     
     @staticmethod
-    def update_to_db(post, model):
+    def update_to_db(post, model, role):
         if model is 'user':
             res = UsGW.update(post['user_id'], post['email'], post['password'], post['last_name'], post['first_name'], 
-                              post['city'], post['profession'], post['organization'], post['dob'])
+                              post['city'], post['profession'], post['organization'], post['dob'], post['user_role'],
+                              role=role)
         elif model is 'device':
             res = DevGW.update(post['device_id'], post['name'], post['description'], post['image'], 
-                               post['creator_id'], post['post_type'])
+                               post['creator_id'], post['post_type'],
+                               role=role)
         elif model is 'test':
-            res = TestGW.update(post['test_id'], post['description'], post['requirements'], post['device_id'])
+            res = TestGW.update(post['test_id'], post['description'], post['requirements'], post['device_id'],
+                                role=role)
         elif model is 'post':
             res = PostGW.update(post['post_id'], post['title'], post['annotation'], post['doc'], post['body'], 
-                                post['creator_id'], post['post_type'])
+                                post['creator_id'], post['post_type'], role=role)
         elif model is 'report':
-            res = RepGW.update(post['report_id'], post['tester_id'], post['body'], post['test_id'])
+            res = RepGW.update(post['report_id'], post['tester_id'], post['body'], post['test_id'], role=role)
         elif model is 'rating':
             res = RatGW.update(post['rating_id'], post['report_id'],
-                               post['developer_id'], post['rating'], post['comment'])
+                               post['developer_id'], post['rating'], post['comment'], role=role)
         else:
             raise UpdateException
         if res is 0:
@@ -140,19 +149,19 @@ class ServiceDB:
             return 'OK'
         
     @staticmethod
-    def delete_object(post, model):
+    def delete_object(post, model, role):
         if model is 'user':
-            res = UsGW.delete(post['user_id'])
+            res = UsGW.delete(post['user_id'], role=role)
         elif model is 'device':
-            res = DevGW.delete(post['device_id'])
+            res = DevGW.delete(post['device_id'], role=role)
         elif model is 'test':
-            res = TestGW.delete(post['test_id'])
+            res = TestGW.delete(post['test_id'], role=role)
         elif model is 'post':
-            res = PostGW.delete(post['post_id'])
+            res = PostGW.delete(post['post_id'], role=role)
         elif model is 'report':
-            res = RepGW.delete(post['report_id'])
+            res = RepGW.delete(post['report_id'], role=role)
         elif model is 'rating':
-            res = RatGW.delete(post['rating_id'])
+            res = RatGW.delete(post['rating_id'], role=role)
         else:
             raise DeleteException
         if res is 0:
@@ -183,13 +192,13 @@ class ServiceDB:
 
 class ServiceOperations(ServiceDB, ServiceValidator):
     @staticmethod
-    def registration(operation, post):
+    def registration(operation, post, role):
         model = 'user'
         if operation is 'add':
             error, post = ServiceValidator.validate_user(post)
             if len(error) == 0:
                 try:
-                    ServiceDB.save_to_db(post, model)
+                    ServiceDB.save_to_db(post, model, role)
                 except SaveException:
                     return 0, 'Произошла ошибка при регистрации'
                 return 1, 'Регистрация прошла успешно'
@@ -199,23 +208,23 @@ class ServiceOperations(ServiceDB, ServiceValidator):
             error, post = ServiceValidator.validate_user(post)
             if len(error) == 0:
                 try:
-                    ServiceDB.save_to_db(post, model)
+                    ServiceDB.save_to_db(post, model, role)
                 except SaveException:
                     return 0, 'Произошла ошибка при удалении'
                 return 1, 'Регистрация прошла успешно'
             else:
                 return 0, error
         if operation is 'delete':
-            ServiceDB.delete_object(post, model)
+            ServiceDB.delete_object(post, model, role)
 
     @staticmethod
-    def post_management(operation, post):
+    def post_management(operation, post, role):
         model = 'post'
         if operation is 'add':
             error, post = ServiceValidator.validate_post(post)
             if len(error) == 0:
                 try:
-                    ServiceOperations.save_to_db(post, model)
+                    ServiceOperations.save_to_db(post, model, role)
                 except SaveException:
                     return 0, "Ошибка при сохранении"
                 except PermissionException:
@@ -227,7 +236,7 @@ class ServiceOperations(ServiceDB, ServiceValidator):
             error, post = ServiceValidator.validate_post(post)
             if len(error) == 0:
                 try:
-                    ServiceOperations.update_to_db(post, model)
+                    ServiceOperations.update_to_db(post, model, role)
                 except UpdateException:
                     return 0, "Ошибка при изменении"
                 except PermissionException:
@@ -237,7 +246,7 @@ class ServiceOperations(ServiceDB, ServiceValidator):
                 return 0, error
         if operation is 'delete':
             try:
-                ServiceDB.delete_object(post, model)
+                ServiceDB.delete_object(post, model, role)
             except DeleteException:
                 return 0, "Ошибка при удалении"
             except PermissionException:
@@ -245,13 +254,13 @@ class ServiceOperations(ServiceDB, ServiceValidator):
             return 1, "Пост удален"
 
     @staticmethod
-    def device_management(post, operation):
+    def device_management(post, operation, role):
         model = 'device'
         if operation is 'add':
             error, post = ServiceValidator.validate_device(post)
             if len(error) == 0:
                 try:
-                    ServiceOperations.save_to_db(post, model)
+                    ServiceOperations.save_to_db(post, model, role)
                 except SaveException:
                     return 0, "Ошибка при сохранении"
                 except PermissionException:
@@ -263,7 +272,7 @@ class ServiceOperations(ServiceDB, ServiceValidator):
             error, post = ServiceValidator.validate_device(post)
             if len(error) == 0:
                 try:
-                    ServiceOperations.update_to_db(post, model)
+                    ServiceOperations.update_to_db(post, model, role)
                 except UpdateException:
                     return 0, "Ошибка при изменении"
                 except PermissionException:
@@ -273,7 +282,7 @@ class ServiceOperations(ServiceDB, ServiceValidator):
                 return 0, error
         if operation is 'delete':
             try:
-                ServiceDB.delete_object(post, model)
+                ServiceDB.delete_object(post, model, role)
             except DeleteException:
                 return 0, "Ошибка при удалении"
             except PermissionException:
@@ -281,13 +290,13 @@ class ServiceOperations(ServiceDB, ServiceValidator):
             return 1, "Устройство удалено"
 
     @staticmethod
-    def test_management(operation, post):
+    def test_management(operation, post, role):
         model = 'test'
         if operation is 'add':
             error, post = ServiceValidator.validate_test(post)
             if len(error) == 0:
                 try:
-                    ServiceOperations.save_to_db(post, model)
+                    ServiceOperations.save_to_db(post, model, role)
                 except SaveException:
                     return 0, "Ошибка при сохранении"
                 except PermissionException:
@@ -299,7 +308,7 @@ class ServiceOperations(ServiceDB, ServiceValidator):
             error, post = ServiceValidator.validate_test(post)
             if len(error) == 0:
                 try:
-                    ServiceOperations.update_to_db(post, model)
+                    ServiceOperations.update_to_db(post, model, role)
                 except UpdateException:
                     return 0, "Ошибка при изменении"
                 except PermissionException:
@@ -309,7 +318,7 @@ class ServiceOperations(ServiceDB, ServiceValidator):
                 return 0, error
         if operation is 'delete':
             try:
-                ServiceDB.delete_object(post, model)
+                ServiceDB.delete_object(post, model, role)
             except DeleteException:
                 return 0, "Ошибка при удалении"
             except PermissionException:
@@ -317,13 +326,13 @@ class ServiceOperations(ServiceDB, ServiceValidator):
             return 1, "Тест удален"
 
     @staticmethod
-    def report_management(operation, post):
+    def report_management(operation, post, role):
         model = 'report'
         if operation is 'add':
             error, post = ServiceValidator.validate_report(post)
             if len(error) == 0:
                 try:
-                    ServiceOperations.save_to_db(post, model)
+                    ServiceOperations.save_to_db(post, model, role)
                 except SaveException:
                     return 0, "Ошибка при сохранении"
                 except PermissionException:
@@ -335,7 +344,7 @@ class ServiceOperations(ServiceDB, ServiceValidator):
             error, post = ServiceValidator.validate_report(post)
             if len(error) == 0:
                 try:
-                    ServiceOperations.update_to_db(post, model)
+                    ServiceOperations.update_to_db(post, model, role)
                 except UpdateException:
                     return 0, "Ошибка при изменении"
                 except PermissionException:
@@ -345,7 +354,7 @@ class ServiceOperations(ServiceDB, ServiceValidator):
                 return 0, error
         if operation is 'delete':
             try:
-                ServiceDB.delete_object(post, model)
+                ServiceDB.delete_object(post, model, role)
             except DeleteException:
                 return 0, "Ошибка при удалении"
             except PermissionException:
@@ -353,11 +362,11 @@ class ServiceOperations(ServiceDB, ServiceValidator):
             return 1, "Отчёт удален"
 
     @staticmethod
-    def rating_management(operation, post):
+    def rating_management(operation, post, role):
         model = 'rating'
         if operation is 'add':
             try:
-                ServiceOperations.save_to_db(post, model)
+                ServiceOperations.save_to_db(post, model, role)
             except SaveException:
                 return 0, "Ошибка при сохранении"
             except PermissionException:
@@ -365,7 +374,7 @@ class ServiceOperations(ServiceDB, ServiceValidator):
             return 1, "Оценка успешно добавлена"
         if operation is 'edit':
             try:
-                ServiceOperations.update_to_db(post, model)
+                ServiceOperations.update_to_db(post, model, role)
             except UpdateException:
                 return 0, "Ошибка при изменении"
             except PermissionException:
@@ -373,7 +382,7 @@ class ServiceOperations(ServiceDB, ServiceValidator):
             return 1, "Оценка успешно изменена"
         if operation is 'delete':
             try:
-                ServiceDB.delete_object(post, model)
+                ServiceDB.delete_object(post, model, role)
             except DeleteException:
                 return 0, "Ошибка при удалении"
             except PermissionException:

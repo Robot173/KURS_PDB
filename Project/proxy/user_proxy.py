@@ -1,7 +1,7 @@
 from gateway.user_gateway import UserGateway
 
 
-class TestProxy:
+class UserProxy:
     # Защищающий прокси
     @staticmethod
     def create(*args, **kwargs):

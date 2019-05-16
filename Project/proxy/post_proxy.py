@@ -1,7 +1,7 @@
 from gateway.post_gateway import PostGateway
 
 
-class TestProxy:
+class PostProxy:
     # Защищающий прокси
     @staticmethod
     def create(role='none', *args, **kwargs):
