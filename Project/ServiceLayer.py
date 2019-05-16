@@ -184,11 +184,12 @@ class ServiceDB:
 class ServiceOperations(ServiceDB, ServiceValidator):
     @staticmethod
     def registration(operation, post):
+        model = 'user'
         if operation is 'add':
             error, post = ServiceValidator.validate_user(post)
             if len(error) == 0:
                 try:
-                    ServiceDB.save_to_db(post, 'user')
+                    ServiceDB.save_to_db(post, model)
                 except SaveException:
                     return 0, 'Произошла ошибка при регистрации'
                 return 1, 'Регистрация прошла успешно'
@@ -198,33 +199,63 @@ class ServiceOperations(ServiceDB, ServiceValidator):
             error, post = ServiceValidator.validate_user(post)
             if len(error) == 0:
                 try:
-                    ServiceDB.save_to_db(post, 'user')
+                    ServiceDB.save_to_db(post, model)
                 except SaveException:
                     return 0, 'Произошла ошибка при удалении'
                 return 1, 'Регистрация прошла успешно'
             else:
                 return 0, error
         if operation is 'delete':
-            ServiceDB.delete_object(post, 'user')
+            ServiceDB.delete_object(post, model)
 
     @staticmethod
     def post_management(operation, post):
+        model = 'post'
         if operation is 'add':
             error, post = ServiceValidator.validate_post(post)
+            if len(error) == 0:
+                try:
+                    ServiceOperations.save_to_db(post, model)
+                except SaveException:
+                    return 0, "Ошибка при сохранении"
+                except PermissionException:
+                    return 0, "Нету прав на выполнение операции"
+                return 1, "Пост успешно добавлен"
+            else:
+                return 0, error
         if operation is 'edit':
             error, post = ServiceValidator.validate_post(post)
+            if len(error) == 0:
+                try:
+                    ServiceOperations.update_to_db(post, model)
+                except UpdateException:
+                    return 0, "Ошибка при изменении"
+                except PermissionException:
+                    return 0, "Нету прав на выполнение операции"
+                return 1, "Пост успешно изменен"
+            else:
+                return 0, error
         if operation is 'delete':
-            ServiceDB.delete_object(post, 'device')
+            try:
+                ServiceDB.delete_object(post, model)
+            except DeleteException:
+                return 0, "Ошибка при удалении"
+            except PermissionException:
+                return 0, "Нету прав на выполнение операции"
+            return 1, "Пост удален"
 
     @staticmethod
     def device_management(post, operation):
+        model = 'device'
         if operation is 'add':
             error, post = ServiceValidator.validate_device(post)
             if len(error) == 0:
                 try:
-                    ServiceOperations.save_to_db(post, 'device')
+                    ServiceOperations.save_to_db(post, model)
                 except SaveException:
                     return 0, "Ошибка при сохранении"
+                except PermissionException:
+                    return 0, "Нету прав на выполнение операции"
                 return 1, "Устройство успешно добавлено"
             else:
                 return 0, error
@@ -232,45 +263,122 @@ class ServiceOperations(ServiceDB, ServiceValidator):
             error, post = ServiceValidator.validate_device(post)
             if len(error) == 0:
                 try:
-                    ServiceOperations.update_to_db(post, 'device')
+                    ServiceOperations.update_to_db(post, model)
                 except UpdateException:
                     return 0, "Ошибка при изменении"
+                except PermissionException:
+                    return 0, "Нету прав на выполнение операции"
                 return 1, "Устройство успешно изменено"
             else:
                 return 0, error
         if operation is 'delete':
             try:
-                ServiceDB.delete_object(post, 'device')
+                ServiceDB.delete_object(post, model)
             except DeleteException:
                 return 0, "Ошибка при удалении"
-            return 1
+            except PermissionException:
+                return 0, "Нету прав на выполнение операции"
+            return 1, "Устройство удалено"
 
     @staticmethod
     def test_management(operation, post):
+        model = 'test'
         if operation is 'add':
             error, post = ServiceValidator.validate_test(post)
+            if len(error) == 0:
+                try:
+                    ServiceOperations.save_to_db(post, model)
+                except SaveException:
+                    return 0, "Ошибка при сохранении"
+                except PermissionException:
+                    return 0, "Нету прав на выполнение операции"
+                return 1, "Тест успешно добавлен"
+            else:
+                return 0, error
         if operation is 'edit':
             error, post = ServiceValidator.validate_test(post)
+            if len(error) == 0:
+                try:
+                    ServiceOperations.update_to_db(post, model)
+                except UpdateException:
+                    return 0, "Ошибка при изменении"
+                except PermissionException:
+                    return 0, "Нету прав на выполнение операции"
+                return 1, "Тест успешно изменен"
+            else:
+                return 0, error
         if operation is 'delete':
-            ServiceDB.delete_object(post, 'test')
+            try:
+                ServiceDB.delete_object(post, model)
+            except DeleteException:
+                return 0, "Ошибка при удалении"
+            except PermissionException:
+                return 0, "Нету прав на выполнение операции"
+            return 1, "Тест удален"
 
     @staticmethod
     def report_management(operation, post):
+        model = 'report'
         if operation is 'add':
             error, post = ServiceValidator.validate_report(post)
+            if len(error) == 0:
+                try:
+                    ServiceOperations.save_to_db(post, model)
+                except SaveException:
+                    return 0, "Ошибка при сохранении"
+                except PermissionException:
+                    return 0, "Нету прав на выполнение операции"
+                return 1, "Отчёт успешно добавлен"
+            else:
+                return 0, error
         if operation is 'edit':
             error, post = ServiceValidator.validate_report(post)
+            if len(error) == 0:
+                try:
+                    ServiceOperations.update_to_db(post, model)
+                except UpdateException:
+                    return 0, "Ошибка при изменении"
+                except PermissionException:
+                    return 0, "Нету прав на выполнение операции"
+                return 1, "Отчёт успешно изменен"
+            else:
+                return 0, error
         if operation is 'delete':
-            ServiceDB.delete_object(post, 'report')
+            try:
+                ServiceDB.delete_object(post, model)
+            except DeleteException:
+                return 0, "Ошибка при удалении"
+            except PermissionException:
+                return 0, "Нету прав на выполнение операции"
+            return 1, "Отчёт удален"
 
     @staticmethod
     def rating_management(operation, post):
+        model = 'rating'
         if operation is 'add':
-            pass
+            try:
+                ServiceOperations.save_to_db(post, model)
+            except SaveException:
+                return 0, "Ошибка при сохранении"
+            except PermissionException:
+                return 0, "Нету прав на выполнение операции"
+            return 1, "Оценка успешно добавлена"
         if operation is 'edit':
-            pass
+            try:
+                ServiceOperations.update_to_db(post, model)
+            except UpdateException:
+                return 0, "Ошибка при изменении"
+            except PermissionException:
+                return 0, "Нету прав на выполнение операции"
+            return 1, "Оценка успешно изменена"
         if operation is 'delete':
-            pass
+            try:
+                ServiceDB.delete_object(post, model)
+            except DeleteException:
+                return 0, "Ошибка при удалении"
+            except PermissionException:
+                return 0, "Нету прав на выполнение операции"
+            return 1, "Оценка удалена"
 
 
 class ServiceLayer():
