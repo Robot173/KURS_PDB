@@ -1,0 +1,75 @@
+{% extends 'src/base.html' %}
+
+{% block title %}Главная страница{% endblock %}
+
+{% block content %}
+	<div class="row">
+		<div class="col-md-12">
+			<h3 class="text-center text-primary">
+				Домашнее задание №3
+			</h3>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-4">
+			<div class="row">
+				<div class="col-md-1">
+				</div>
+				<div class="col-md-10">
+					<h3 class="text-center">
+						Управление устройствами
+					</h3> 
+					<a type="button" class="btn btn-success btn-block" href="/add_device">
+						Добавить устройство
+					</a>
+					<a type="button" class="btn btn-success btn-block" href="/change_device">
+						Изменить устройство
+					</a>
+					<a type="button" class="btn btn-success btn-block" href="/delete_device">
+						Удалить устройство
+					</a>
+				</div>
+				<div class="col-md-1">
+				</div>
+			</div>
+		</div>
+        <div class="col-md-4">
+			<div class="row">
+				<div class="col-md-1">
+				</div>
+				<div class="col-md-10">
+					<h3 class="text-center">
+						Управление тестированиями
+					</h3>
+					<a type="button" class="btn btn-success btn-block" href="/add_test">
+						Добавить тест
+					</a>
+					<a type="button" class="btn btn-success btn-block" href="/change_test">
+						Изменить тест
+					</a>
+					<a type="button" class="btn btn-success btn-block" href="/delete_test">
+						Удалить тест
+					</a>
+				</div>
+				<div class="col-md-1">
+				</div>
+			</div>
+		</div>
+		<div class="col-md-4">
+			<div class="row">
+				<div class="col-md-1">
+				</div>
+				<div class="col-md-10">
+					<h3 class="text-center">
+						Поиск объектов
+					</h3> 
+					<a type="button" class="btn btn-block btn-primary" href="/get_devices_by_user">
+						Устройства разработчиков
+					</a>
+				</div>
+				<div class="col-md-1">
+				</div>
+			</div>
+		</div>
+	</div>
+{% endblock %}

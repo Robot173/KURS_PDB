@@ -1,35 +1,58 @@
 from flask import Flask, render_template, request
 from ServiceLayer import ServiceOperations as Service
 from constants import *
+from flask import Flask, session
+from flask.ext.session import Session
 from functools import wraps
 from flask import g, request, redirect, url_for
 from flask import Flask, session, redirect, url_for, escape, request
 
 app = Flask(__name__, static_url_path='/static')
+SESSION_TYPE = 'redis'
+PERMANENT_SESSION_LIFETIME = 2400
+app.config.from_object(__name__)
+Session(app)
 
 
-def login_required(f, role='tester', main_page_flag=False):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if 'username' in session:
-            if (session['role'] == role) or main_page_flag:
-                return f(*args, **kwargs)
-        return redirect(url_for('login', next=request.url))
-    return decorated_function
+def login_required(role='tester', main_page_flag=False):
+    def decorated_decorator(func):
+        def wrapped():
+            if (session.get('role', 'none') == role) or main_page_flag:
+                return func()
+            return redirect(url_for('login', next=request.url))
+        return wrapped
+    return decorated_decorator
 
 
 @app.route('/login', methods=["POST", "GET"])
 def login_form():
+    message = None
     if request.method == "POST":
-        Service.registration('read', request.post)
-    return render_template('src/login.html')
+        parameters = request.form.to_dict()
+        user = Service.get_objects('user', 'email', value=parameters['email'])
+        if len(user) != 0:
+            if user['password'] == parameters['password']:
+                session['id'] = user['id']
+                session['role'] = user['role']
+            else:
+                message = "Неверная пара логин/пароль!"
+        else:
+            message = "Форма не заполнена!"
+    return render_template('src/login.html', messages=message)
 
 
 @app.route('/')
 @login_required(main_page_flag=True)
-def main_page_developer():
-    if session['role'] == 'developer':
+def main_page():
+    role = session.get('role', 'none')
+    if role == 'developer':
         return render_template('src/developer_index.html')
+    elif role == 'tester':
+        return render_template('src/tester_index.html')
+    elif role == 'admin':
+        return render_template('src/admin_index.html')
+    else:
+        render_template('src/login.html')
 
 
 @app.route('/add_device', methods=["POST", "GET"])
@@ -104,6 +127,26 @@ def delete_test_form():
         return render_template('src/developer_index.html', messages=message)
     tests = Service.get_objects('test')
     return render_template('src/delete_test.html', tests=tests)
+
+
+@app.route('/find_tests', methods=["POST", "GET"])
+@login_required(role='tester')
+def find_tests():
+    if request.method == "POST":
+        devices = Service.get_objects('user')
+        test_id = request.form['test_id']
+        test = Service.get_objects('test', 'id', test_id)
+        if 'title' in request.form:
+            code, message = Service.update_to_db(request.form, 'test')
+            return render_template('src/developer_index.html', messages=message)
+        return render_template('src/show_test.html', test=test, devices=devices)
+    tests = Service.get_objects('test')
+    return render_template('src/get_tests.html', tests=tests)
+
+
+
+
+
 
 
 @app.route('/add_user', methods=["POST", "GET"])
