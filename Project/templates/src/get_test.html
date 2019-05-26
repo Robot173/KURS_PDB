@@ -1,0 +1,62 @@
+{% extends 'src/base.html' %}
+
+{% block title %}Выбрать устройство{% endblock %}
+
+{% block content %}
+    <div class="row">
+		<div class="col-md-4">
+		</div>
+		<div class="col-md-4">
+			<form role="form" method="post">
+                <div class="form-group">
+					<label for="InputTest">
+						Название теста
+					</label>
+                    <select class="form-control" id="test_id" name="test_id">
+                        {% for test in tests %}
+                            <option value="{{ test['test_id'] }}">{{ test['title'] }}</option>
+                        {% endfor %}
+					</select>
+				</div>
+				<div class="form-group">
+				<button type="submit" class="btn btn-primary">
+					Изменить тест
+				</button>
+                </div>
+			</form>
+            <form role="form" method="post">
+                <div class="form-group">
+                    <div class="form-group">
+					<label for="name">
+						Название устройства
+					</label>
+					<input class="form-control" id="name" name="name" />
+				    </div>
+				</div>
+                <div class="form-group">
+                    <div class="form-group">
+					<label for="title">
+						Название теста
+					</label>
+					<input class="form-control" id="title" name="title" />
+				    </div>
+				</div>
+				<div class="form-group">
+				<button type="submit" class="btn btn-primary">
+					{% block button %}{% endblock %}
+				</button>
+                </div>
+			</form>
+		</div>
+		<div class="col-md-4">
+		</div>
+	</div>
+{% endblock %}
+
+{% block footer %}
+    	<div class="row">
+					<a type="button" class="btn btn-success btn-block" href="/">
+						Вернуться в главное меню
+					</a>
+        </div>
+{% endblock %}

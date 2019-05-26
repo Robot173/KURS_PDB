@@ -15,6 +15,14 @@ app.config.from_object(__name__)
 Session(app)
 
 
+def get_role():
+    return session.get('role', 'none')
+
+
+def get_id():
+    return session.get('id', 'none')
+
+
 def login_required(role='tester', main_page_flag=False):
     def decorated_decorator(func):
         @wraps(func)
@@ -49,7 +57,7 @@ def login_form():
 @app.route('/')
 @login_required(main_page_flag=True)
 def main_page():
-    role = session.get('role', 'none')
+    role = get_role()
     if role == 'developer':
         return render_template('src/developer_index.html')
     elif role == 'tester':
@@ -82,10 +90,10 @@ def register_page():
 @login_required(role='developer')
 def add_device_form():
     message = None
-    users = Service.get_objects('user', 'id', value=session.get('id', 'none'))
+    users = Service.get_objects('user', 'id', value=get_id())
     if request.method == "POST":
         parameters = request.form.to_dict()
-        code, message = Service.device_management(parameters, 'add', session.get('role', 'none'))
+        code, message = Service.device_management(parameters, 'add', get_role())
     return render_template('src/add_device.html', user=users[0], messages=message, device_types=DEVICE_TYPES)
 
 
@@ -101,7 +109,7 @@ def change_device_forms():
         if 'device_type' in parameters:
             code, message = Service.update_to_db(parameters, 'device')
             return render_template('src/developer_index.html', messages=message)
-        return render_template('src/change_device.html', device=device, users=users, device_types=DEVICE_TYPES)
+        return render_template('src/change_device.html', device=device[0], user=users[0], device_types=DEVICE_TYPES)
     devices = Service.get_objects('device', 'author_id', id_user)
     return render_template('src/get_device.html', devices=devices)
 
@@ -109,12 +117,12 @@ def change_device_forms():
 @app.route('/delete_device', methods=["POST", "GET"])
 @login_required(role='developer')
 def delete_device_form():
+    role = get_role()
     if request.method == "POST":
         parameters = request.form.to_dict()
-        message = Service.delete_object(parameters, 'device')
+        message = Service.delete_object(parameters, 'device', get_role())
         return render_template('src/developer_index.html', messages=message)
-    role = session.get('role', 'none')
-    devices = Service.get_objects('device', 'author_id', role)
+    devices = Service.get_objects('device', 'author_id', get_id())
     return render_template('src/delete_device.html', devices=devices)
 
 
@@ -122,26 +130,28 @@ def delete_device_form():
 @login_required(role='developer')
 def add_test_form():
     message = None
-    devices = Service.get_objects('device')
+    devices = Service.get_objects('device', 'author_id', get_id())
     if request.method == "POST":
         parameters = request.form.to_dict()
-        code, message = Service.test_management(parameters, 'add')
+        code, message = Service.test_management(parameters, 'add', get_role())
     return render_template('src/add_test.html', devices=devices, messages=message, test_types=DEVICE_TYPES)
 
 
 @app.route('/change_test', methods=["POST", "GET"])
 @login_required(role='developer')
 def change_test_forms():
+    id_user = session.get('id', 'none')
+    message = None
     if request.method == "POST":
-        devices = Service.get_objects('user')
+        devices = Service.get_objects('device', 'author_id', id_user)
         test_id = request.form['test_id']
         test = Service.get_objects('test', 'id', test_id)
         if 'title' in request.form:
             code, message = Service.update_to_db(request.form, 'test')
             return render_template('src/developer_index.html', messages=message)
         return render_template('src/change_test.html', test=test, devices=devices)
-    tests = Service.get_objects('test')
-    return render_template('src/get_test.html', tests=tests)
+    tests = Service.get_objects('test', 'author', id_user)
+    return render_template('src/get_test_change.html', tests=tests)
 
 
 @app.route('/delete_test', methods=["POST", "GET"])
@@ -151,7 +161,7 @@ def delete_test_form():
         message = Service.delete_object(request.form, 'test')
         return render_template('src/developer_index.html', messages=message)
     tests = Service.get_objects('test')
-    return render_template('src/delete_test.html', tests=tests)
+    return render_template('src/get_test_delete.html', tests=tests)
 
 
 @app.route('/find_tests', methods=["POST", "GET"])

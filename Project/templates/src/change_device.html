@@ -19,22 +19,8 @@
 		</div>
 		<div class="col-md-4">
 			<form role="form" method="post">
-                <input type="hidden" name="InputDevice" value="{{ device[0][0] }}">
-                <div class="form-group">
-					<label for="InputUser">
-						Пользователь
-					</label>
-                    <select class="form-control" id="InputUser" name="InputUser" type="user">
-                        {% for user in users %}
-						<option value="{{ user['user_id'] }}"
-                        {% if user['user_id']==device['author_id'] %}
-                            selected
-                        {% endif %}
-                        >{{ user['email'] }}</option>
-
-                        {% endfor %}
-					</select>
-				</div>
+                <input class="form-control" id="device_id" name="device_id" type="hidden" value="{{ device['device_id'] }}">
+                <input class="form-control" id="user_id" name="user_id" type="hidden" value="{{ user['user_id'] }}">
 				<div class="form-group">
 					<label for="name">
 						Название
@@ -45,7 +31,7 @@
 					<label for="description">
 						Описание
 					</label>
-					<input type="description" class="form-control" id="description" name="description" />
+					<input type="description" class="form-control" id="description" name="description" value="{{ device['description'] }}"/>
 				</div>
 				<div class="form-group">
 					<label for="device_type">
@@ -53,7 +39,9 @@
 					</label>
                 <select class="form-control" id="device_type" name="device_type" type="device_type">
                     {% for type in device_types %}
-						<option value="{{ type }}">{{ type|capitalize }}</option>
+						<option value="{{ type }}"
+                        {% if type == device['device_type'] %}selected{% endif %}>
+                            {{ type|capitalize }}</option>
                     {% endfor %}
                 </select>
 				</div>

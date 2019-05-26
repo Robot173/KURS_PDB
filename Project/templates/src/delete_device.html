@@ -12,7 +12,7 @@
 					<label for="InputDevice">
 						Устройство
 					</label>
-                    <select class="form-control" id="InputDevice" name="InputDevice" type="device">
+                    <select class="form-control" id="device_id" name="device_id" type="device">
                         {% for device in devices %}
 						<option value="{{ device[0] }}">{{ device[2] }}</option>
                         {% endfor %}

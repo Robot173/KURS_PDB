@@ -25,9 +25,9 @@ class DeviceProxy:
             return response
 
     @staticmethod
-    def delete(role, *args, **kwargs):
+    def delete(did, role):
         if role is 'tester':
             return -1
         else:
-            response = DeviceGateway.delete(*args, **kwargs)
+            response = DeviceGateway.delete(did)
             return response
