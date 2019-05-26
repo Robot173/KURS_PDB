@@ -5,13 +5,13 @@ import psycopg2
 class TestGateway:
 
     @staticmethod
-    def create(requirements, title, device_id):
-        with connection.cursor(cursor_factory=psycopg2.extras.DictCursor) as c:
+    def create(device_id, title, requirements):
+        with connection.cursor() as c:
             query = 'INSERT INTO public.test(' \
-                    '  requirements, title, device_id)' \
-                    '  VALUES (ARRAY({%s}), %s, %s);'
+                    '  device_id, title, requirements)' \
+                    '  VALUES (%s, %s, %s);'
             try:
-                c.execute(query, (requirements, title, device_id))
+                c.execute(query, (device_id, title, requirements))
                 connection.commit()
                 return 1
             except psycopg2.DatabaseError:
@@ -28,11 +28,11 @@ class TestGateway:
                 if search is 'test':
                     query += 'test_id=%s;'
                 if search is 'author':
-                    query += 'device_id = ('\
+                    query += 'device_id IN ('\
                             'SELECT device_id FROM public.device '\
                             'WHERE author_id=%s)'
                 if search is 'name_title':
-                    query += 'device_id = ('\
+                    query += 'device_id IN ('\
                             'SELECT device_id FROM public.device '\
                             'WHERE name = %s)'
                 c.execute(query, (value, ))

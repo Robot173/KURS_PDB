@@ -107,7 +107,7 @@ def change_device_forms():
         device_id = parameters['device_id']
         device = Service.get_objects('device', 'id', device_id)
         if 'device_type' in parameters:
-            code, message = Service.update_to_db(parameters, 'device')
+            code, message = Service.device_management(parameters, 'edit', get_role())
             return render_template('src/developer_index.html', messages=message)
         return render_template('src/change_device.html', device=device[0], user=users[0], device_types=DEVICE_TYPES)
     devices = Service.get_objects('device', 'author_id', id_user)
@@ -140,7 +140,7 @@ def add_test_form():
 @app.route('/change_test', methods=["POST", "GET"])
 @login_required(role='developer')
 def change_test_forms():
-    id_user = session.get('id', 'none')
+    id_user = get_id()
     message = None
     if request.method == "POST":
         devices = Service.get_objects('device', 'author_id', id_user)

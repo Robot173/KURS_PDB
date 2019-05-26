@@ -47,7 +47,7 @@ class ServiceValidator:
     @staticmethod
     def validate_test(post):
         error = []
-        if len(post['description']) < 10:
+        if len(post['requirements']) < 10:
             error.append('Слишком короткое описание теста')
         return error, post
 
@@ -121,24 +121,25 @@ class ServiceDB:
     @staticmethod
     def update_to_db(post, model, role):
         if model is 'user':
-            res = UsGW.update(post['user_id'], post['email'], post['password'], post['last_name'], post['first_name'], 
-                              post['city'], post['profession'], post['organization'], post['dob'], post['user_role'],
-                              role=role)
+            res = UsGW.update(role,
+                post['user_id'], post['email'], post['password'], post['last_name'], post['first_name'],
+                post['city'], post['profession'], post['organization'], post['dob'], post['user_role'])
         elif model is 'device':
-            res = DevGW.update(post['device_id'], post['name'], post['description'], post['image'], 
-                               post['creator_id'], post['post_type'],
-                               role=role)
+            res = DevGW.update(role,
+                post['device_id'], post['user_id'], post['name'], post['description'],
+                post['image'], post['device_type'])
         elif model is 'test':
-            res = TestGW.update(post['test_id'], post['description'], post['requirements'], post['device_id'],
-                                role=role)
+            res = TestGW.update(role,
+                post['test_id'], post['description'], post['requirements'], post['device_id'])
         elif model is 'post':
-            res = PostGW.update(post['post_id'], post['title'], post['annotation'], post['doc'], post['body'], 
-                                post['creator_id'], post['post_type'], role=role)
+            res = PostGW.update(role,
+                                post['post_id'], post['title'], post['annotation'], post['doc'], post['body'],
+                                post['creator_id'], post['type'])
         elif model is 'report':
-            res = RepGW.update(post['report_id'], post['tester_id'], post['body'], post['test_id'], role=role)
+            res = RepGW.update(role, post['report_id'], post['tester_id'], post['body'], post['test_id'])
         elif model is 'rating':
-            res = RatGW.update(post['rating_id'], post['report_id'],
-                               post['developer_id'], post['rating'], post['comment'], role=role)
+            res = RatGW.update(role, post['rating_id'], post['report_id'],
+                               post['developer_id'], post['rating'], post['comment'])
         else:
             raise UpdateException
         if res is 0:
@@ -290,7 +291,7 @@ class ServiceOperations(ServiceDB, ServiceValidator):
             return 1, "Устройство удалено"
 
     @staticmethod
-    def test_management(operation, post, role, author=None):
+    def test_management(post, operation, role):
         model = 'test'
         if operation is 'add':
             error, post = ServiceValidator.validate_test(post)
@@ -326,7 +327,7 @@ class ServiceOperations(ServiceDB, ServiceValidator):
             return 1, "Тест удален"
 
     @staticmethod
-    def report_management(operation, post, role):
+    def report_management(post, operation, role):
         model = 'report'
         if operation is 'add':
             error, post = ServiceValidator.validate_report(post)
@@ -362,7 +363,7 @@ class ServiceOperations(ServiceDB, ServiceValidator):
             return 1, "Отчёт удален"
 
     @staticmethod
-    def rating_management(operation, post, role):
+    def rating_management(post, operation, role):
         model = 'rating'
         if operation is 'add':
             try:

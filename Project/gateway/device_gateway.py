@@ -38,7 +38,7 @@ class DeviceGateway:
     def update(device_id, author_id, name, description, image, device_type):
         with connection.cursor() as c:
             query = 'UPDATE public.device' \
-                    '  SET name=%s, description=%s, image=%s, creator_id=%s, type=%s' \
+                    '  SET name=%s, description=%s, image=%s, author_id=%s, type=%s' \
                     '  WHERE device_id=%s;'
             c.execute(query, (name, description, image, author_id, device_type, device_id))
             connection.commit()
