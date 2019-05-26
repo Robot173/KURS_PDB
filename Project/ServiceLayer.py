@@ -72,7 +72,7 @@ class ServiceDB:
                 profession=post['profession'],
                 organization=post['organization'],
                 dob=post['dob'],
-                role=role)
+                role=post['role'])
         elif model is 'device':
             res = DevGW.create(
                 name=post['name'],
@@ -192,7 +192,7 @@ class ServiceDB:
 
 class ServiceOperations(ServiceDB, ServiceValidator):
     @staticmethod
-    def registration(operation, post, role):
+    def registration(post, operation, role):
         model = 'user'
         if operation is 'add':
             error, post = ServiceValidator.validate_user(post)
@@ -290,7 +290,7 @@ class ServiceOperations(ServiceDB, ServiceValidator):
             return 1, "Устройство удалено"
 
     @staticmethod
-    def test_management(operation, post, role):
+    def test_management(operation, post, role, author=None):
         model = 'test'
         if operation is 'add':
             error, post = ServiceValidator.validate_test(post)

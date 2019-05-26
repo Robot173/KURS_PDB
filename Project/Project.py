@@ -1,11 +1,12 @@
+
 from flask import Flask, render_template, request
 from ServiceLayer import ServiceOperations as Service
 from constants import *
-from flask import Flask, session
-from flask.ext.session import Session
+from flask import Flask, session, redirect, url_for, escape, request
+from flask_session import Session
 from functools import wraps
 from flask import g, request, redirect, url_for
-from flask import Flask, session, redirect, url_for, escape, request
+
 
 app = Flask(__name__, static_url_path='/static')
 SESSION_TYPE = 'redis'
@@ -16,10 +17,12 @@ Session(app)
 
 def login_required(role='tester', main_page_flag=False):
     def decorated_decorator(func):
+        @wraps(func)
         def wrapped():
             if (session.get('role', 'none') == role) or main_page_flag:
                 return func()
-            return redirect(url_for('login', next=request.url))
+            return redirect(url_for('login_form', next=request.url))
+        wrapped.__name__ = func.__name__
         return wrapped
     return decorated_decorator
 
@@ -31,9 +34,11 @@ def login_form():
         parameters = request.form.to_dict()
         user = Service.get_objects('user', 'email', value=parameters['email'])
         if len(user) != 0:
-            if user['password'] == parameters['password']:
-                session['id'] = user['id']
-                session['role'] = user['role']
+            if user[0]['password'] == parameters['password']:
+                print(user[0]['user_id'])
+                session['id'] = user[0]['user_id']
+                session['role'] = user[0]['role']
+                return redirect(url_for('main_page', next=request.url))
             else:
                 message = "Неверная пара логин/пароль!"
         else:
@@ -52,33 +57,52 @@ def main_page():
     elif role == 'admin':
         return render_template('src/admin_index.html')
     else:
-        render_template('src/login.html')
+        return redirect(url_for('login_form', next=request.url))
+
+
+@app.route('/logout')
+@login_required(main_page_flag=True)
+def logout_page():
+    session.pop('role', 'none')
+    session.pop('id', 'none')
+    return redirect(url_for('login_form', next=request.url))
+
+
+@app.route('/register', methods=["POST", "GET"])
+def register_page():
+    message = None
+    if request.method == "POST":
+        parameters = request.form.to_dict()
+        print(parameters['role'])
+        code, message = Service.registration(parameters, 'add', role=parameters['role'])
+    return render_template('src/register.html', messages=message)
 
 
 @app.route('/add_device', methods=["POST", "GET"])
 @login_required(role='developer')
 def add_device_form():
     message = None
-    users = Service.get_objects('user')
+    users = Service.get_objects('user', 'id', value=session.get('id', 'none'))
     if request.method == "POST":
         parameters = request.form.to_dict()
-        code, message = Service.device_management(parameters, 'add')
-    return render_template('src/add_device.html', users=users, messages=message, device_types=DEVICE_TYPES)
+        code, message = Service.device_management(parameters, 'add', session.get('role', 'none'))
+    return render_template('src/add_device.html', user=users[0], messages=message, device_types=DEVICE_TYPES)
 
 
 @app.route('/change_device', methods=["POST", "GET"])
 @login_required(role='developer')
 def change_device_forms():
+    id_user = session.get('id', 'none')
+    users = Service.get_objects('user', 'id', value=id_user)
     if request.method == "POST":
         parameters = request.form.to_dict()
-        users = Service.get_objects('user')
         device_id = parameters['device_id']
         device = Service.get_objects('device', 'id', device_id)
         if 'device_type' in parameters:
             code, message = Service.update_to_db(parameters, 'device')
             return render_template('src/developer_index.html', messages=message)
         return render_template('src/change_device.html', device=device, users=users, device_types=DEVICE_TYPES)
-    devices = Service.get_objects('device')
+    devices = Service.get_objects('device', 'author_id', id_user)
     return render_template('src/get_device.html', devices=devices)
 
 
@@ -89,7 +113,8 @@ def delete_device_form():
         parameters = request.form.to_dict()
         message = Service.delete_object(parameters, 'device')
         return render_template('src/developer_index.html', messages=message)
-    devices = Service.get_objects('device')
+    role = session.get('role', 'none')
+    devices = Service.get_objects('device', 'author_id', role)
     return render_template('src/delete_device.html', devices=devices)
 
 
@@ -140,7 +165,7 @@ def find_tests():
             code, message = Service.update_to_db(request.form, 'test')
             return render_template('src/developer_index.html', messages=message)
         return render_template('src/show_test.html', test=test, devices=devices)
-    tests = Service.get_objects('test')
+    tests = Service.get_objects('test', 'author', session.get('id', 'none'))
     return render_template('src/get_tests.html', tests=tests)
 
 

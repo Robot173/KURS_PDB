@@ -27,6 +27,14 @@ class TestGateway:
                     query += 'device_id=%s;'
                 if search is 'test':
                     query += 'test_id=%s;'
+                if search is 'author':
+                    query += 'device_id = ('\
+                            'SELECT device_id FROM public.device '\
+                            'WHERE author_id=%s)'
+                if search is 'name_title':
+                    query += 'device_id = ('\
+                            'SELECT device_id FROM public.device '\
+                            'WHERE name = %s)'
                 c.execute(query, (value, ))
             else:
                 query += ';'

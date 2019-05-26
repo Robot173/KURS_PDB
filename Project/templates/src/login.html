@@ -20,25 +20,28 @@
 					<h3>
 						Пожалуйста, введите свой логин и пароль
 					</h3>
-					<form role="form">
+					<form role="form" method="post">
 						<div class="form-group">
 
 							<label for="exampleInputEmail1">
 								Почта
 							</label>
-							<input type="email" class="form-control" id="exampleInputEmail1" />
+							<input type="email" class="form-control" id="email" name="email" />
 						</div>
 						<div class="form-group">
 
 							<label for="exampleInputPassword1">
 								Пароль
 							</label>
-							<input type="password" class="form-control" id="exampleInputPassword1" />
+							<input type="password" class="form-control" id="password" name="password" />
 						</div>
 						<button type="submit" class="btn btn-primary">
 							Войти
 						</button>
 					</form>
+                    <a type="button" class="btn btn-block btn-primary" href="/register">
+						Зарегистрироваться
+					</a>
 				</div>
 				<div class="col-md-2">
 				</div>
