@@ -130,7 +130,7 @@ class ServiceDB:
                 post['image'], post['device_type'])
         elif model is 'test':
             res = TestGW.update(role,
-                post['test_id'], post['description'], post['requirements'], post['device_id'])
+                post['test_id'], post['title'], post['requirements'], post['device_id'])
         elif model is 'post':
             res = PostGW.update(role,
                                 post['post_id'], post['title'], post['annotation'], post['doc'], post['body'],
@@ -156,7 +156,7 @@ class ServiceDB:
         elif model is 'device':
             res = DevGW.delete(post['device_id'], role=role)
         elif model is 'test':
-            res = TestGW.delete(post['test_id'], role=role)
+            res = TestGW.delete(role, post['test_id'])
         elif model is 'post':
             res = PostGW.delete(post['post_id'], role=role)
         elif model is 'report':
@@ -389,6 +389,13 @@ class ServiceOperations(ServiceDB, ServiceValidator):
             except PermissionException:
                 return 0, "Нету прав на выполнение операции"
             return 1, "Оценка удалена"
+
+    @staticmethod
+    def find_specific_test(tests, title):
+        for test in tests:
+            if test['title'] == title:
+                return 1, test
+        return 0, "Нету теста"
 
 
 class ServiceLayer():

@@ -25,7 +25,7 @@ class TestGateway:
                 query += ' WHERE '
                 if search is 'device':
                     query += 'device_id=%s;'
-                if search is 'test':
+                if search is 'id':
                     query += 'test_id=%s;'
                 if search is 'author':
                     query += 'device_id IN ('\
@@ -43,7 +43,7 @@ class TestGateway:
             return c.fetchall()
 
     @staticmethod
-    def update(test_id, requirements, title, device_id):
+    def update(test_id, title, requirements, device_id):
         with connection.cursor() as c:
             query = 'UPDATE public.test' \
                     '  SET requirements=%s, title=%s, device_id=%s' \

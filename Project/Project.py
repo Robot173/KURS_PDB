@@ -120,7 +120,7 @@ def delete_device_form():
     role = get_role()
     if request.method == "POST":
         parameters = request.form.to_dict()
-        message = Service.delete_object(parameters, 'device', get_role())
+        code, message = Service.device_management(parameters, 'delete', get_role())
         return render_template('src/developer_index.html', messages=message)
     devices = Service.get_objects('device', 'author_id', get_id())
     return render_template('src/delete_device.html', devices=devices)
@@ -143,12 +143,16 @@ def change_test_forms():
     id_user = get_id()
     message = None
     if request.method == "POST":
+        parameters = request.form.to_dict()
         devices = Service.get_objects('device', 'author_id', id_user)
-        test_id = request.form['test_id']
-        test = Service.get_objects('test', 'id', test_id)
-        if 'title' in request.form:
-            code, message = Service.update_to_db(request.form, 'test')
+        if 'requirements' in request.form:
+            code, message = Service.test_management(parameters, 'edit', get_role())
             return render_template('src/developer_index.html', messages=message)
+        elif 'name' in request.form:
+            tests = Service.get_objects('test', 'name_title', parameters['name'])
+            code, test = Service.find_specific_test(tests, parameters['title'])
+        else:
+            test = Service.get_objects('test', 'id', parameters['test_id'])[0]
         return render_template('src/change_test.html', test=test, devices=devices)
     tests = Service.get_objects('test', 'author', id_user)
     return render_template('src/get_test_change.html', tests=tests)
@@ -158,7 +162,13 @@ def change_test_forms():
 @login_required(role='developer')
 def delete_test_form():
     if request.method == "POST":
-        message = Service.delete_object(request.form, 'test')
+        parameters = request.form.to_dict()
+        if 'name' in request.form:
+            tests = Service.get_objects('test', 'name_title', parameters['name'])
+            code, test = Service.find_specific_test(tests, parameters['title'])
+        else:
+            test = Service.get_objects('test', 'id', parameters['test_id'])[0]
+        code, message = Service.test_management(test, 'delete', get_role())
         return render_template('src/developer_index.html', messages=message)
     tests = Service.get_objects('test')
     return render_template('src/get_test_delete.html', tests=tests)

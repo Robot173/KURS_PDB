@@ -19,13 +19,19 @@
 		</div>
 		<div class="col-md-4">
 			<form role="form" method="post">
+                <input class="form-control" id="test_id" name="test_id" type="hidden" value="{{ test['test_id'] }}">
                 <div class="form-group">
 					<label for="device_id">
 						Устройство
 					</label>
                     <select class="form-control" id="device_id" name="device_id" type="user">
                         {% for device in devices %}
-                            <option value="{{ device['device_id'] }}">{{ device['name'] }}</option>
+                            <option
+                                    {% if device['device_id']==test['device_id'] %}
+                                    selected
+                                    {% endif %}
+                                    value="{{ device['device_id'] }}">{{ device['name'] }}
+                            </option>
                         {% endfor %}
 					</select>
 				</div>
@@ -33,13 +39,13 @@
 					<label for="title">
 						Название
 					</label>
-					<input type="title" class="form-control" id="title" name="title" />
+					<input type="title" class="form-control" id="title" name="title" value="{{ test['title'] }}" />
 				</div>
 				<div class="form-group">
 					<label for="requirements">
 						Описание
 					</label>
-					<input type="requirements" class="form-control" id="requirements" name="requirements" />
+					<input type="requirements" class="form-control" id="requirements" name="requirements" value="{{ test['requirements'] }}" />
 				</div>
 				<div class="form-group">
 				<button type="submit" class="btn btn-primary">
