@@ -24,7 +24,13 @@ class ReportGateway:
             if search is not None and value is not None:
                 if search is 'id':
                     query += ' WHERE report_id=%s'
-                    c.execute(query, (search, value, ))
+                    c.execute(query, (value, ))
+                if search is 'test':
+                    query += ' WHERE test_id=%s'
+                    try:
+                        c.execute(query, (value, ))
+                    except psycopg2.DatabaseError:
+                        return 0
             else:
                 query += ';'
                 c.execute(query)

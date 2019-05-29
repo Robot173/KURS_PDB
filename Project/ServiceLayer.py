@@ -367,6 +367,7 @@ class ServiceOperations(ServiceDB, ServiceValidator):
         model = 'rating'
         if operation is 'add':
             try:
+                post['comment'] = 'none'
                 ServiceOperations.save_to_db(post, model, role)
             except SaveException:
                 return 0, "Ошибка при сохранении"
@@ -396,6 +397,32 @@ class ServiceOperations(ServiceDB, ServiceValidator):
             if test['title'] == title:
                 return 1, test
         return 0, "Нету теста"
+
+    @staticmethod
+    def read_devices_by_user():
+        users = ServiceDB.get_objects('user', 'role', 'developer')
+        for user in users:
+            user['city'] = []
+            devices = ServiceDB.get_objects('device', 'author_id', user['user_id'])
+            for device in devices:
+                device['author_id'] = []
+                tests = ServiceDB.get_objects('test', 'device', device['device_id'])
+                for test in tests:
+                    device['author_id'].append(test)
+            user['city'].append(device)
+        return users
+
+
+    @staticmethod
+    def tests_with_reports(user_id):
+        tests = ServiceDB.get_objects('test', 'author', user_id)
+        for test in tests:
+            test['device_id'] = []
+            reports = ServiceDB.get_objects('report', 'test', test['test_id'])
+            if reports != 0:
+                for report in reports:
+                    test['device_id'].append(report)
+        return tests
 
 
 class ServiceLayer():
@@ -459,14 +486,7 @@ class ServiceLayer():
     def read_device(id_user):
         return DevGW.read("id", "{}".format(id_user))
 
-    @staticmethod
-    def read_devices_by_user(id_user):
-        devices = DevGW.read()
-        final_devices = []
-        for device in devices:
-            if device[1] == id_user:
-                final_devices.append(device)
-        return final_devices
+
 
     @staticmethod
     def delete_device(did):

@@ -178,50 +178,44 @@ def delete_test_form():
 @login_required(role='tester')
 def find_tests():
     if request.method == "POST":
-        devices = Service.get_objects('user')
-        test_id = request.form['test_id']
-        test = Service.get_objects('test', 'id', test_id)
-        if 'title' in request.form:
-            code, message = Service.update_to_db(request.form, 'test')
-            return render_template('src/developer_index.html', messages=message)
-        return render_template('src/show_test.html', test=test, devices=devices)
-    tests = Service.get_objects('test', 'author', session.get('id', 'none'))
-    return render_template('src/get_tests.html', tests=tests)
+        parameters = request.form.to_dict()
+        if 'name' in request.form:
+            tests = Service.get_objects('test', 'name_title', parameters['name'])
+            code, test = Service.find_specific_test(tests, parameters['title'])
+            return render_template('src/show_test_with_form.html', test=test, user=get_id())
+        elif 'body' in request.form:
+            code, message = Service.report_management(parameters, 'add', get_role())
+            return render_template('src/tester_index.html', messages=message)
+        else:
+            test = Service.get_objects('test', 'id', parameters['test_id'])[0]
+            return render_template('src/show_test_with_form.html', test=test, user=get_id())
+    tests = Service.get_objects('test')
+    return render_template('src/get_test_find.html', tests=tests)
 
 
-
-
-
-
-
-@app.route('/add_user', methods=["POST", "GET"])
-@login_required(role='developer')
-def register_form():
-    message = None
+@app.route('/all_tests', methods=["POST", "GET"])
+def find_all_tests():
     if request.method == "POST":
-        email = request.form['email']
-        password = request.form['password']
-        message = Service.add_user(email, password)
-    return render_template('src/register.html', messages=message)
+        parameters = request.form.to_dict()
+        if 'body' in request.form:
+            code, message = Service.report_management(parameters, 'add', get_role())
+            return render_template('src/tester_index.html', messages=message)
+        else:
+            test = Service.get_objects('test', 'id', parameters['test_id'])[0]
+            return render_template('src/show_test_with_form.html', test=test, user=get_id())
+    users_with_devices = Service.read_devices_by_user()
+    return render_template('src/show_tests.html', users=users_with_devices)
 
 
-@app.route('/get_devices_by_user', methods=["POST", "GET"])
-@login_required(role='developer')
-def show_devices_form():
+@app.route('/show_reports', methods=["POST", "GET"])
+def show_reports():
     if request.method == "POST":
-        user = Service.get_user(request.form['InputUser'])
-        devices = Service.read_devices_by_user(user[0][0])
-        return render_template('src/show_devices.html', devices=devices, user=user[0])
-    users = Service.get_users()
-    return render_template('src/get_user.html', users=users)
-
-
-@app.route('/test', methods=["POST", "GET"])
-def some_form():
-    pass
+        parameters = request.form.to_dict()
+        code, message = Service.rating_management(parameters, 'add', get_role())
+        return render_template('src/developer_index.html', messages=message)
+    tests_with_reports = Service.tests_with_reports(get_id())
+    return render_template('src/show_tests.html', tests=tests_with_reports, user_id=get_id())
 
 
 if __name__ == '__main__':
     app.run()
-
-

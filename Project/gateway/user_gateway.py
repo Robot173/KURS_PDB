@@ -28,6 +28,9 @@ class UserGateway:
                 if search is 'email':
                     query += ' WHERE email=%s'
                     c.execute(query, (value,))
+                if search is 'role':
+                    query += ' WHERE role=%s'
+                    c.execute(query, (value,))
             else:
                 query += ';'
                 c.execute(query)
